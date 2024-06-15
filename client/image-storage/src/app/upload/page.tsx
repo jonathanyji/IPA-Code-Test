@@ -1,35 +1,55 @@
 "use client"
 import { useState } from "react"
-import postMediaData from "../api/handleMediaApi";
+import axios from "axios";
 
 export default function UploadPage() {
 
+    const [file, setFile] = useState(null);
     const [name, setName] = useState('');
-    const [fileName, setFileName] = useState('');
-    const [size, setSize] = useState('');
-    const [type, setType] = useState('');
+    const [uploadProgress, setUploadProgress] = useState(0);
 
-    function handleFileChange(event: any) {
-        const selectedFile = event.target.files?.[0] || null;
-        setFileName(selectedFile.name);
-        setSize(selectedFile.size);
-        setType(selectedFile.type);
-        console.log("FILE DETAILS: ", selectedFile);
-    }
+    const handleFileChange = (e: any) => {
+        setFile(e.target.files[0]);
+    };
 
-    function handleSubmit(event: any){
-        event.preventDefault();
-        const finalData = {name, fileName, size, type};
-        console.log('Submitted data:' , finalData);
-        const url = 'http://localhost:3000/api/media';
-        postMediaData(url, finalData);
-    }
+    const handleFormSubmit = async (e: any) => {
+        e.preventDefault();
+
+        if (!file) {
+            console.error('Please select a file');
+            return;
+        }
+
+        const url = 'http://localhost:3000/api/media';  // Replace with your server's upload endpoint
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('name', name);
+
+        try {
+            const response = await axios.post(url, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                },
+                // onUploadProgress: (progressEvent) => {
+                //     const progress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+                //     setUploadProgress(progress);
+                // }
+            });
+
+            console.log('Upload successful:', response.data);
+            // Handle successful upload
+        } catch (error) {
+            console.error('Failed to upload file:', error);
+            // Handle error
+        }
+    };
 
     return (
         <div>
             <h1>Hello from Upload page</h1>
             <div className="mx-10">
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleFormSubmit}>
                     <div className="space-y-12">
                         <div className="border-b border-gray-900/10 pb-12">
                             <h2 className="text-base font-semibold leading-7 text-gray-900">Upload File</h2>
@@ -48,13 +68,13 @@ export default function UploadPage() {
                                             id="file_input"
                                             type="file"
                                             onChange={handleFileChange} />
-                                        <p>{fileName ?
+                                        {/* <p>{fileName ?
                                             <>
                                                 `File name: {fileName}, <br />
                                                 File Size: {size} bytes` <br />
                                                 File Type: {type}`
                                             </>
-                                            : 'No file selected'}</p>
+                                            : 'No file selected'}</p> */}
                                     </div>
                                 </div>
                             </div>

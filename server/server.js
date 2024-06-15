@@ -2,7 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const dotenv = require('dotenv');
 const cors = require('cors');
-const fs = require('fs');
+const multer = require('multer');
 
 const mediaRoutes = require('./routes/mediaRoutes');
 const authRoutes = require('./routes/authRoutes');
@@ -12,12 +12,14 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Middleware to parse JSON requests
+// Middleware
 app.use(bodyParser.json());
+const upload = multer({ dest: "tmp/" });
 
 // Enable CORS for all routes
 app.use(cors());
 
+// APIs
 app.use('/api', mediaRoutes);
 app.use('/api/auth', authRoutes);
 

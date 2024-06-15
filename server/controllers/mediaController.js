@@ -1,40 +1,82 @@
 const { body, validationResult } = require('express-validator');
-const Media = require('../models/mediaModel');
+const multer = require('multer');
 const jwt = require('jsonwebtoken');
+const path = require('path');
+const s3Client = require('../config/s3Config');
+const fs = require('fs');
+const { PutObjectCommand } = require('@aws-sdk/client-s3');
+const Media = require('../models/mediaModel');
+
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'tmp/')
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + path.extname(file.originalname));
+    }
+});
+
+const upload = multer({ storage: storage });
 
 exports.createMedia = [
-    
+    upload.single('file'), 
     body('name').isString().isLength({ min: 1 }).trim().escape(),
-    body('fileType').isString().isLength({ min: 1 }).trim().escape(),
-    body('fileSize').isInt(),
 
     async (req, res) => {
         try{
-            const token = req.header('Authorization').replace('Bearer ', '');
-            const decoded = jwt.verify(token, process.env.JWT_SECRET);
-            const userId = decoded.userId;
+            // const token = req.header('Authorization').replace('Bearer ', '');
+            // const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            // const userId = decoded.userId;
 
-        if (!userId) {
-            return res.status(401).json({ error: 'Unauthorized' });
-        }
+        // if (!userId) {
+        //     return res.status(401).json({ error: 'Unauthorized' });
+        // }
+
+        const { filename, mimetype, size } = req.file;
+
 
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
         }
+        
+        const tmpFile = await fs.createReadStream('tmp/' + filename);
+
+        const tempUserId = 1;
+        try {
+          const command = new PutObjectCommand({
+            Bucket: process.env.S3_BUCKET_NAME,
+            Key: tempUserId + "/" + filename,
+            Body: tmpFile,
+            ContentType: mimetype,
+          });
+        
+            const response = await s3Client.send(command);
+            console.log(response);
+          } catch (err) {
+            console.error(err);
+          }
 
         const media = {
             name: req.body.name,
-            fileType: req.body.fileType,
-            uploadedByID: userId,
-            filePath: userId + "/file_location",
-            fileSize: req.body.fileSize,
+            fileType: mimetype,
+            uploadedByID: tempUserId,
+            filePath: tempUserId + "/" + filename,
+            fileSize: size,
         };
-
-        console.log("SERVER RECEIVED DATA: ", media);
 
         try {
             const id = await Media.create(media);
+            const filePath = 'tmp/' + filename;
+
+            fs.unlink(filePath, (err) => {
+                if (err) {
+                  console.error(err);
+                } else {
+                  console.log('Clean up tmp folder.');
+                }
+              });
             res.status(201).json({ id, ...media });
         } catch (err) {
             console.log("SERVER ERROR: ", err);
@@ -42,6 +84,7 @@ exports.createMedia = [
         }
 
         } catch (err){
+            console.log("SERVER ERROR: ", err);
             res.status(500).json({ error: 'Internal Server Error' });
         }
         
