@@ -2,10 +2,10 @@ const { body, validationResult } = require('express-validator');
 const multer = require('multer');
 const jwt = require('jsonwebtoken');
 const path = require('path');
-const s3Client = require('../config/s3Config');
 const fs = require('fs');
 const { PutObjectCommand } = require('@aws-sdk/client-s3');
 const Media = require('../models/mediaModel');
+const { S3Client } = require('@aws-sdk/client-s3');
 
 
 const storage = multer.diskStorage({
@@ -16,6 +16,14 @@ const storage = multer.diskStorage({
         cb(null, Date.now() + path.extname(file.originalname));
     }
 });
+
+const s3Client = new S3Client({
+    region: process.env.REGION,
+    credentials: {
+      accessKeyId: process.env.ASSESS_KEY_ID,
+      secretAccessKey: process.env.SECRET_ACCESS_KEY,
+    },
+  });
 
 const upload = multer({ storage: storage });
 
@@ -32,6 +40,7 @@ exports.createMedia = [
         // if (!userId) {
         //     return res.status(401).json({ error: 'Unauthorized' });
         // }
+        
 
         const { filename, mimetype, size } = req.file;
 
@@ -55,7 +64,7 @@ exports.createMedia = [
             const response = await s3Client.send(command);
             console.log(response);
           } catch (err) {
-            console.error(err);
+            console.error("S3 upload error: ", err);
           }
 
         const media = {
@@ -93,7 +102,8 @@ exports.createMedia = [
 
 exports.getAllMedia = async (req, res) => {
     try {
-        const media = await Media.findAll();
+        const userId = 1;
+        const media = await Media.findAll(userId);
         res.json(media);
     } catch (err) {
         res.status(500).json({ error: 'Database error' });
@@ -102,12 +112,14 @@ exports.getAllMedia = async (req, res) => {
 
 exports.getMediaById = async (req, res) => {
     const id = parseInt(req.params.id, 10);
+    const userId = 1;
+
     if (isNaN(id)) {
         return res.status(400).json({ error: 'Invalid ID' });
     }
 
     try {
-        const media = await Media.findById(id);
+        const media = await Media.findById(id, userId);
         if (!media) {
             return res.status(404).json({ error: 'Media not found' });
         }

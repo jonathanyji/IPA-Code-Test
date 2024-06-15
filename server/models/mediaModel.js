@@ -9,13 +9,13 @@ class Media {
         return result.insertId;
     }
 
-    static async findAll() {
-        const [rows] = await db.execute('SELECT * FROM Media');
+    static async findAll(userId) {
+        const [rows] = await db.execute('SELECT * FROM Media WHERE uploadedByID = ?', [userId]);
         return rows;
     }
 
-    static async findById(id) {
-        const [rows] = await db.execute('SELECT * FROM Media WHERE ID = ?', [id]);
+    static async findById(id, userId) {
+        const [rows] = await db.execute('SELECT * FROM Media WHERE ID = ? AND uploadedByID = ?', [id, userId]);
         return rows[0];
     }
 
