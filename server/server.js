@@ -21,8 +21,6 @@ app.use(cors());
 app.use('/api', mediaRoutes);
 app.use('/api/auth', authRoutes);
 
-
-
 // Start the server
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
