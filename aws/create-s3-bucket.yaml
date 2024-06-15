@@ -1,0 +1,17 @@
+Resources:
+  MyFirstS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties: 
+      BucketName: mys3bucketdemorandom
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders:
+              - '*'
+            AllowedMethods:
+              - GET
+              - PUT
+              - HEAD
+              - POST
+              - DELETE
+            AllowedOrigins:
+              - '*'

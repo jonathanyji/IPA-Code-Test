@@ -15,11 +15,13 @@ const port = process.env.PORT || 3000;
 // Middleware to parse JSON requests
 app.use(bodyParser.json());
 
+// Enable CORS for all routes
+app.use(cors());
+
 app.use('/api', mediaRoutes);
 app.use('/api/auth', authRoutes);
 
-// Enable CORS for all routes
-app.use(cors());
+
 
 // Start the server
 app.listen(port, () => {
