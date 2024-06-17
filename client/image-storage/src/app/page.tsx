@@ -1,14 +1,13 @@
-"use client"
-import Image from "next/image";
-import { useUser } from "@auth0/nextjs-auth0/client";
+"use client";
+import { useUser } from '@auth0/nextjs-auth0/client';
 
 export default function Home() {
-  const {user, error, isLoading} = useUser();
-  console.log("Auth0 user: ", user)
+  const { user } = useUser();
+
   return (
     <div className="bg-gray-100 min-h-screen flex flex-col justify-center items-center">
       <div className="max-w-3xl w-full bg-white rounded-lg shadow-md p-8">
-        <h1 className="text-3xl font-bold mb-4 text-center">Welcome to FileUploader</h1>
+        <h1 className="text-3xl font-bold mb-4 text-center">Welcome {user?.name} to FileUploader</h1>
         <p className="text-lg text-center mb-8">
           Easily upload and manage your files with our intuitive application.
         </p>
@@ -47,8 +46,6 @@ export default function Home() {
       <footer className="mt-8 text-center text-gray-600">
         <p>&copy; 2024 FileUploader. All rights reserved.</p>
       </footer>
-
-      <a href="/api/auth/login">TEST</a>
     </div>
   );
 }

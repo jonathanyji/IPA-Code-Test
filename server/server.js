@@ -5,7 +5,6 @@ const cors = require('cors');
 const multer = require('multer');
 
 const mediaRoutes = require('./routes/mediaRoutes');
-const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 
 dotenv.config();
@@ -23,7 +22,6 @@ app.use(cors());
 // APIs
 app.use('/api', mediaRoutes);
 app.use('/api/user', userRoutes);
-app.use('/api/auth', authRoutes);
 
 // Start the server
 app.listen(port, () => {

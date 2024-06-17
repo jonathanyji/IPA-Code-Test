@@ -1,5 +1,4 @@
 const db = require('../config/db');
-const bcrypt = require('bcryptjs');
 
 class User {
     static async createUser(name, email) {
@@ -16,8 +15,9 @@ class User {
         return rows[0];
     }
 
-    static async comparePassword(password, hash) {
-        return await bcrypt.compare(password, hash);
+    static async findUserById(id) {
+        const [rows] = await db.query('SELECT name, email FROM users WHERE id = ?', [id]);
+        return rows[0];
     }
 }
 

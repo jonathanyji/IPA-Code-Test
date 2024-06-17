@@ -2,11 +2,11 @@
 import { useEffect, useState } from "react";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import axios from 'axios';
+import { useRouter } from 'next/navigation';
 
 export default function Register() {
-
-    const { user, error, isLoading } = useUser();
-    console.log("Auth0 user: ", user)
+    const router = useRouter();
+    const { user } = useUser();
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
 
@@ -14,7 +14,6 @@ export default function Register() {
         if (user) {
             setEmail(user.email || '');
         }
-
     }, [user]);
 
     function handleSubmit(e: any) {
@@ -24,11 +23,10 @@ export default function Register() {
         axios.post('http://localhost:3000/api/user/register', data)
             .then(response => {
                 console.log('User created successfully:', response.data);
-                // Handle success, e.g., show a success message to the user
+                router.push('/');
             })
             .catch(error => {
                 console.error('Error creating user:', error.response.data);
-                // Handle error, e.g., show an error message to the user
             });
     }
     return (
@@ -62,8 +60,17 @@ export default function Register() {
                                 className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Create</button>
                         </div>
                     </form>
+                    <br />
+                    <br />
+                    <br />
+                    <a
+                            href="/api/auth/logout"
+                          >
+                            Click here to logout
+                          </a>
                 </div>
             </div>
+            
 
         </>
     );

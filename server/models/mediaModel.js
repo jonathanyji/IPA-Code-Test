@@ -14,8 +14,8 @@ class Media {
         return rows;
     }
 
-    static async findById(id, userId) {
-        const [rows] = await db.execute('SELECT * FROM Media WHERE ID = ? AND uploadedByID = ?', [id, userId]);
+    static async findById(id) {
+        const [rows] = await db.execute('SELECT * FROM Media WHERE ID = ?', [id]);
         return rows[0];
     }
 

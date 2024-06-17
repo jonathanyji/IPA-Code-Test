@@ -1,13 +1,23 @@
 "use client"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import axios from "axios";
 import { useRouter } from 'next/navigation';
+import { useUser } from '@auth0/nextjs-auth0/client';
 
 export default function UploadPage() {
+    const { user } = useUser();
     const router = useRouter();
     const [file, setFile] = useState(null);
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
+    const [userEmail, setUserEmail] = useState('');
+
+    
+    useEffect(() => {
+        if (user) {
+            setUserEmail(user.email || '');
+        }
+    }, [user]);
 
     const handleFileChange = (e: any) => {
         setFile(e.target.files[0]);
@@ -27,6 +37,7 @@ export default function UploadPage() {
         formData.append('file', file);
         formData.append('name', name);
         formData.append('description', description);
+        formData.append('email', userEmail);
 
         try {
             const response = await axios.post(url, formData, {

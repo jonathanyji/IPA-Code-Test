@@ -7,8 +7,7 @@ const { PutObjectCommand, DeleteObjectCommand, GetObjectCommand } = require('@aw
 const Media = require('../models/mediaModel');
 const { S3Client } = require('@aws-sdk/client-s3');
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
-
-const tempUserId = 3;
+const User = require('../models/userModel');
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -33,20 +32,15 @@ exports.createMedia = [
     upload.single('file'),
     body('name').isString().isLength({ min: 1 }).trim().escape(),
     body('description').isString().isLength({ min: 1 }).trim().escape(),
+    body('email').isEmail().normalizeEmail(),
 
     async (req, res) => {
         try {
-            // const token = req.header('Authorization').replace('Bearer ', '');
-            // const decoded = jwt.verify(token, process.env.JWT_SECRET);
-            // const userId = decoded.userId;
 
-            // if (!userId) {
-            //     return res.status(401).json({ error: 'Unauthorized' });
-            // }
-
+            const user = await User.findUserByEmail(req.body.email);
+            console.log("SDBSDB: ", user)
 
             const { filename, mimetype, size } = req.file;
-
 
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
@@ -58,7 +52,7 @@ exports.createMedia = [
             try {
                 const command = new PutObjectCommand({
                     Bucket: process.env.S3_BUCKET_NAME,
-                    Key: tempUserId + "/" + filename,
+                    Key: user.id + "/" + filename,
                     Body: tmpFile,
                     ContentType: mimetype,
                 });
@@ -75,8 +69,8 @@ exports.createMedia = [
                 name: req.body.name,
                 description: req.body.description,
                 fileType: mimetype,
-                uploadedByID: tempUserId,
-                filePath: tempUserId + "/" + filename,
+                uploadedByID: user.id,
+                filePath: user.id + "/" + filename,
                 fileSize: size,
             };
 
@@ -107,9 +101,16 @@ exports.createMedia = [
 
 exports.getAllMedia = async (req, res) => {
     try {
-        const media = await Media.findAll(tempUserId);
+        const userEmail = req.query.userEmail;
+        const user = await User.findUserByEmail(userEmail);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        
+        const media = await Media.findAll(user.id);
         res.json(media);
     } catch (err) {
+        console.error('Error retrieving media:', err);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 };
@@ -123,7 +124,8 @@ exports.getMediaById = async (req, res) => {
     }
 
     try {
-        const media = await Media.findById(id, tempUserId);
+
+        const media = await Media.findById(id);
         if (!media) {
             return res.status(404).json({ error: 'Media not found' });
         }
@@ -147,30 +149,19 @@ exports.getMediaById = async (req, res) => {
 
         res.json({media, url});
     } catch (err) {
+        console.log("EROR: ", err);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 };
 
 exports.updateMedia = [
     body('name').isString().isLength({ min: 1 }).trim().escape(),
-    body('fileType').isString().isLength({ min: 1 }).trim().escape(),
-    body('fileSize').isInt(),
+    body('description').isString().isLength({ min: 1 }).trim().escape(),
 
     async (req, res) => {
 
         try {
-            const token = req.header('Authorization').replace('Bearer ', '');
-            const decoded = jwt.verify(token, process.env.JWT_SECRET);
-            const userId = decoded.userId;
-
-            if (!userId) {
-                return res.status(401).json({ error: 'Unauthorized' });
-            }
-
-            const id = parseInt(req.params.id, 10);
-            if (isNaN(id)) {
-                return res.status(400).json({ error: 'Invalid ID' });
-            }
+            const user = await User.findUserByEmail(req.body.email);
 
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
@@ -179,14 +170,11 @@ exports.updateMedia = [
 
             const media = {
                 name: req.body.name,
-                fileType: req.body.fileType,
-                uploadedByID: userId,
-                filePath: userId + "/file_location",
-                fileSize: req.body.fileSize,
+                description: req.body.description
             };
 
             try {
-                const existingMedia = await Media.findById(id);
+                const existingMedia = await Media.findById(id, user.id);
                 if (!existingMedia) {
                     return res.status(404).json({ error: 'Media not found' });
                 }
@@ -213,7 +201,7 @@ exports.deleteMedia = async (req, res) => {
     }
 
     try {
-        const existingMedia = await Media.findById(id, tempUserId);
+        const existingMedia = await Media.findById(id);
         if (!existingMedia) {
             return res.status(404).json({ error: 'Media not found' });
         }

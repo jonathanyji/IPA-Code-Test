@@ -3,22 +3,39 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import Link from 'next/link';
+import { useUser } from '@auth0/nextjs-auth0/client';
 
 export default function FilesPage() {
-
+    const { user } = useUser();
     const [files, setFiles] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
 
-    useEffect(() => {
-        const fetchFiles = async () => {
-            const response = await axios.get('http://localhost:3000/api/media');
-            setFiles(response.data);
-        };
+    const [userEmail, setUserEmail] = useState('');
 
-        fetchFiles();
-    }, []);
+    useEffect(() => {
+        if (user) {
+            setUserEmail(user.email || '');
+        }
+    
+        const fetchFiles = async () => {
+            try {
+                const response = await axios.get('http://localhost:3000/api/media', {
+                    params: {
+                        userEmail: user ? user.email || '' : ''
+                    }
+                });
+                setFiles(response.data);
+            } catch (error) {
+                console.error('Error fetching files:', error);
+            }
+        };
+    
+        if (userEmail) {
+            fetchFiles();
+        }
+    }, [user, userEmail]);
 
     const handleSearch = (event: any) => {
         setSearchTerm(event.target.value);
