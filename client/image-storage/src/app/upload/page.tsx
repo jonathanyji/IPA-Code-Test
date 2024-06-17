@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useUser } from '@auth0/nextjs-auth0/client';
 
 export default function UploadPage() {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
     const { user } = useUser();
     const router = useRouter();
     const [file, setFile] = useState(null);
@@ -31,8 +32,6 @@ export default function UploadPage() {
             return;
         }
 
-        const url = 'http://localhost:3000/api/media';
-
         const formData = new FormData();
         formData.append('file', file);
         formData.append('name', name);
@@ -40,7 +39,7 @@ export default function UploadPage() {
         formData.append('email', userEmail);
 
         try {
-            const response = await axios.post(url, formData, {
+            const response = await axios.post(`${baseUrl}/api/media`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }

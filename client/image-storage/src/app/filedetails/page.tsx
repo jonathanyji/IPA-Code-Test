@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function FileDetailsPage() {
-
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
   const searchParams = useSearchParams();
   const router = useRouter();
   const id = searchParams.get('id');
@@ -16,7 +16,7 @@ export default function FileDetailsPage() {
   useEffect(() => {
     const fetchFileDetails = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/api/media/${id}`);
+        const response = await axios.get(`${baseUrl}/api/media/${id}`);
         setFileDetails(response.data.media);
         setFileUrl(response.data.url);
       } catch (error) {
@@ -30,7 +30,7 @@ export default function FileDetailsPage() {
 
   const handleDelete = async () => {
     try {
-      await axios.delete(`http://localhost:3000/api/media/${id}`);
+      await axios.delete(`${baseUrl}/api/media/${id}`);
       alert('File deleted successfully');
       router.push('/files');
     } catch (error) {

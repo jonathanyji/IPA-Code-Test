@@ -8,13 +8,14 @@ import { useRouter } from 'next/navigation';
 const inter = Inter({ subsets: ['latin'] });
 
 const Navigation = ({ children }: any) => {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
     const { user } = useUser();
     const router = useRouter();
     const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {
         if (user) {
-            axios.get('http://localhost:3000/api/user/getuserbyemail/' + user?.email).then((res) => {
+            axios.get(`${baseUrl}/api/user/getuserbyemail/` + user?.email).then((res) => {
                 if (res.data.message === 'User not found') {
                     router.push('/register')
                 } else {

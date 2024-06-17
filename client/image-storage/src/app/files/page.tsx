@@ -6,12 +6,13 @@ import Link from 'next/link';
 import { useUser } from '@auth0/nextjs-auth0/client';
 
 export default function FilesPage() {
+    const itemsPerPage = 10;
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+    
     const { user } = useUser();
     const [files, setFiles] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 10;
-
     const [userEmail, setUserEmail] = useState('');
 
     useEffect(() => {
@@ -21,7 +22,7 @@ export default function FilesPage() {
     
         const fetchFiles = async () => {
             try {
-                const response = await axios.get('http://localhost:3000/api/media', {
+                const response = await axios.get(`${baseUrl}/api/media`, {
                     params: {
                         userEmail: user ? user.email || '' : ''
                     }

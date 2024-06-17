@@ -5,6 +5,7 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation';
 
 export default function Register() {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
     const router = useRouter();
     const { user } = useUser();
     const [name, setName] = useState('');
@@ -20,7 +21,7 @@ export default function Register() {
         e.preventDefault();
         const data = { name, email };
     
-        axios.post('http://localhost:3000/api/user/register', data)
+        axios.post(`${baseUrl}/api/user/register`, data)
             .then(response => {
                 console.log('User created successfully:', response.data);
                 router.push('/');
