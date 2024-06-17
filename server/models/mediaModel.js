@@ -3,8 +3,8 @@ const db = require('../config/db');
 class Media {
     static async create(media) {
         const [result] = await db.execute(
-            'INSERT INTO Media (Name, FileType, UploadedByID, FilePath, FileSize) VALUES (?, ?, ?, ?, ?)',
-            [media.name, media.fileType, media.uploadedByID, media.filePath, media.fileSize]
+            'INSERT INTO Media (Name, Description, FileType, UploadedByID, FilePath, FileSize) VALUES (?, ?, ?, ?, ?, ?)',
+            [media.name, media.description, media.fileType, media.uploadedByID, media.filePath, media.fileSize]
         );
         return result.insertId;
     }
@@ -21,8 +21,8 @@ class Media {
 
     static async update(id, media) {
         await db.execute(
-            'UPDATE Media SET Name = ?, FileType = ?, UploadedByID = ?, FilePath = ?, FileSize = ? WHERE ID = ?',
-            [media.name, media.fileType, media.uploadedByID, media.filePath, media.fileSize, id]
+            'UPDATE Media SET Name = ?, Description = ?, WHERE ID = ?',
+            [media.name, media.description, id]
         );
     }
 

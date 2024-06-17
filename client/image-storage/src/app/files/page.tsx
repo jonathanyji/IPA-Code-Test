@@ -74,10 +74,14 @@ export default function FilesPage() {
                                         {file.name}
                                     </th>
                                     <td className="px-6 py-4">
-                                        {file.uploadedBy}
+                                        {file.uploadedByID}
                                     </td>
                                     <td className="px-6 py-4">
-                                        {new Date(file.createdAt).toLocaleString()}
+                                        {new Date(file.uploadDate).toLocaleDateString('en-US', {
+                                            month: '2-digit',
+                                            day: '2-digit',
+                                            year: 'numeric'
+                                        })}
                                     </td>
                                     <td className="px-6 py-4">
                                         <Link href={{ pathname: `/filedetails`, query: { id: file.id } }}>

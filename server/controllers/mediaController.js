@@ -8,6 +8,7 @@ const Media = require('../models/mediaModel');
 const { S3Client } = require('@aws-sdk/client-s3');
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 
+const tempUserId = 3;
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -31,6 +32,7 @@ const upload = multer({ storage: storage });
 exports.createMedia = [
     upload.single('file'),
     body('name').isString().isLength({ min: 1 }).trim().escape(),
+    body('description').isString().isLength({ min: 1 }).trim().escape(),
 
     async (req, res) => {
         try {
@@ -53,7 +55,6 @@ exports.createMedia = [
 
             const tmpFile = await fs.createReadStream('tmp/' + filename);
 
-            const tempUserId = 1;
             try {
                 const command = new PutObjectCommand({
                     Bucket: process.env.S3_BUCKET_NAME,
@@ -68,8 +69,11 @@ exports.createMedia = [
                 console.error("S3 upload error: ", err);
             }
 
+            console.log("I SEE DESCVRION: ", req.body.description);
+
             const media = {
                 name: req.body.name,
+                description: req.body.description,
                 fileType: mimetype,
                 uploadedByID: tempUserId,
                 filePath: tempUserId + "/" + filename,
@@ -103,8 +107,7 @@ exports.createMedia = [
 
 exports.getAllMedia = async (req, res) => {
     try {
-        const userId = 1;
-        const media = await Media.findAll(userId);
+        const media = await Media.findAll(tempUserId);
         res.json(media);
     } catch (err) {
         res.status(500).json({ error: 'Internal Server Error' });
@@ -113,7 +116,6 @@ exports.getAllMedia = async (req, res) => {
 
 exports.getMediaById = async (req, res) => {
     const id = parseInt(req.params.id, 10);
-    const userId = 1;
     let url = null;
 
     if (isNaN(id)) {
@@ -121,7 +123,7 @@ exports.getMediaById = async (req, res) => {
     }
 
     try {
-        const media = await Media.findById(id, userId);
+        const media = await Media.findById(id, tempUserId);
         if (!media) {
             return res.status(404).json({ error: 'Media not found' });
         }
@@ -205,7 +207,6 @@ exports.updateMedia = [
 
 exports.deleteMedia = async (req, res) => {
     const id = parseInt(req.params.id, 10);
-    const tempUserId = 1;
     console.log("DELETE api called")
     if (isNaN(id)) {
         return res.status(400).json({ error: 'Invalid ID' });

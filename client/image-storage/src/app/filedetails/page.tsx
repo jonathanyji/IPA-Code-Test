@@ -53,9 +53,10 @@ export default function FileDetailsPage() {
       )}
       <div className="mb-4">
         <p className="text-lg font-semibold">Name: <span className="font-normal">{fileDetails.name}</span></p>
+        <p className="text-lg font-semibold">Description: <span className="font-normal">{fileDetails.description}</span></p>
         <p className="text-lg font-semibold">File Type: <span className="font-normal">{fileDetails.fileType}</span></p>
-        <p className="text-lg font-semibold">Uploaded By: <span className="font-normal">{fileDetails.uploadedBy}</span></p>
-        <p className="text-lg font-semibold">Created At: <span className="font-normal">{new Date(fileDetails.createdAt).toLocaleString()}</span></p>
+        <p className="text-lg font-semibold">Uploaded By: <span className="font-normal">{fileDetails.uploadedByID}</span></p>
+        <p className="text-lg font-semibold">Created At: <span className="font-normal">{new Date(fileDetails.uploadDate).toLocaleString()}</span></p>
       </div>
 
       <div className="flex justify-center space-x-4">
