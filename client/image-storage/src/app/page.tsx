@@ -1,6 +1,10 @@
+"use client"
 import Image from "next/image";
+import { useUser } from "@auth0/nextjs-auth0/client";
 
 export default function Home() {
+  const {user, error, isLoading} = useUser();
+  console.log("Auth0 user: ", user)
   return (
     <div className="bg-gray-100 min-h-screen flex flex-col justify-center items-center">
       <div className="max-w-3xl w-full bg-white rounded-lg shadow-md p-8">
@@ -43,6 +47,8 @@ export default function Home() {
       <footer className="mt-8 text-center text-gray-600">
         <p>&copy; 2024 FileUploader. All rights reserved.</p>
       </footer>
+
+      <a href="/api/auth/login">TEST</a>
     </div>
   );
 }

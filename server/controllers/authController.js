@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
 
 exports.signup = async (req, res) => {
-    const { name, email, password } = req.body;
+    const { name, email } = req.body;
 
     try {
         const existingUser = await User.findUserByEmail(email);
@@ -12,7 +12,7 @@ exports.signup = async (req, res) => {
             return res.status(400).json({ error: 'Email already exists' });
         }
 
-        const userId = await User.createUser(name, email, password);
+        const userId = await User.createUser({ name, email });
 
         res.status(201).json({ message: 'User created successfully', userId });
     } catch (err) {

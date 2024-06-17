@@ -6,8 +6,7 @@ const router = express.Router();
 
 router.post('/signup', [
     body('name').isString().isLength({ min: 1 }).trim().escape(),
-    body('email').isEmail().normalizeEmail(),
-    body('password').isLength({ min: 6 })
+    body('email').isEmail().normalizeEmail()
 ], authController.signup);
 
 router.post('/signin', [

@@ -2,10 +2,9 @@ const db = require('../config/db');
 const bcrypt = require('bcryptjs');
 
 class User {
-    static async createUser(name, email, password) {
+    static async createUser(name, email) {
         try {
-            const hashedPassword = await bcrypt.hash(password, 10);
-            const [result] = await db.execute('INSERT INTO Users (name, email, password) VALUES (?, ?, ?)', [name, email, hashedPassword]);
+            const [result] = await db.execute('INSERT INTO Users (name, email) VALUES (?, ?)', [name, email]);
             return result.insertId;
         } catch (error) {
             throw error;
@@ -20,7 +19,6 @@ class User {
     static async comparePassword(password, hash) {
         return await bcrypt.compare(password, hash);
     }
-    
 }
 
 module.exports = User;
