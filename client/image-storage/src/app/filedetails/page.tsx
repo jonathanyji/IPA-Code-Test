@@ -1,7 +1,8 @@
 "use client"
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useSearchParams, useRouter  } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function FileDetailsPage() {
 
@@ -43,16 +44,33 @@ export default function FileDetailsPage() {
   }
 
   return (
-    <div>
-      <h1>File Details</h1>
-      <p>Name: {fileDetails.name}</p>
-      <p>File Type: {fileDetails.fileType}</p>
-      <p>Uploaded By: {fileDetails.uploadedBy}</p>
-      <p>Created At: {new Date(fileDetails.createdAt).toLocaleString()}</p>
-      <p>File Path: {fileUrl}</p>
-      <img src={fileUrl}></img>
-      <button onClick={handleDelete}>Delete File</button>
-      {/* Add more details as needed */}
+    <div className="max-w-3xl mx-auto p-6 bg-white rounded-lg shadow-md mt-10">
+      <h1 className="text-3xl font-bold mb-4">File Details</h1>
+      {fileUrl && (
+        <div className="mb-4">
+          <img src={fileUrl} alt={fileDetails.name} className="max-w-md h-auto rounded-lg shadow-sm mx-auto" />
+        </div>
+      )}
+      <div className="mb-4">
+        <p className="text-lg font-semibold">Name: <span className="font-normal">{fileDetails.name}</span></p>
+        <p className="text-lg font-semibold">File Type: <span className="font-normal">{fileDetails.fileType}</span></p>
+        <p className="text-lg font-semibold">Uploaded By: <span className="font-normal">{fileDetails.uploadedBy}</span></p>
+        <p className="text-lg font-semibold">Created At: <span className="font-normal">{new Date(fileDetails.createdAt).toLocaleString()}</span></p>
+      </div>
+
+      <div className="flex justify-center space-x-4">
+        <button
+          onClick={handleDelete}
+          className="px-4 py-2 bg-red-500 text-white font-semibold rounded-md shadow-md hover:bg-red-600 focus:outline-none"
+        >
+          Delete File
+        </button>
+        <Link href={{ pathname: `/editfile`, query: { id: fileDetails.id } }}>
+          <span className="inline-block px-4 py-2 bg-blue-500 text-white font-semibold rounded-md shadow-md hover:bg-blue-600 focus:outline-none">
+            Edit
+          </span>
+        </Link>
+      </div>
     </div>
   );
 }

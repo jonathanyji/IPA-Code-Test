@@ -7,46 +7,112 @@ import Link from 'next/link';
 export default function FilesPage() {
 
     const [files, setFiles] = useState([]);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
 
     useEffect(() => {
         const fetchFiles = async () => {
-        const response = await axios.get('http://localhost:3000/api/media');
-        setFiles(response.data);
+            const response = await axios.get('http://localhost:3000/api/media');
+            setFiles(response.data);
+        };
+
+        fetchFiles();
+    }, []);
+
+    const handleSearch = (event: any) => {
+        setSearchTerm(event.target.value);
+        setCurrentPage(1);
     };
 
-    fetchFiles();
-  }, []);
+    const filteredFiles = files.filter(file =>
+        file.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const paginatedFiles = filteredFiles.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
+
+    const totalPages = Math.ceil(filteredFiles.length / itemsPerPage);
 
     return (
-        <>
-          <div className="mx-10">
-            <h1>All Files</h1>
-            <ul className="divide-y divide-gray-100">
-              {files.length > 0 ? (
-                files.map(file => (
-                  <li key={file.id} className="flex justify-between gap-x-6 py-5">
-                    <div className="flex min-w-0 gap-x-4">
-                      <div className="min-w-0 flex-auto">
-                        <p className="text-sm font-semibold leading-6 text-gray-900">{file.name}</p>
-                      </div>
+        <div className="mx-10 mt-8">
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-2xl font-bold text-gray-900">All Files</h1>
+                <input
+                    type="text"
+                    placeholder="Search by title"
+                    value={searchTerm}
+                    onChange={handleSearch}
+                    className="p-2 border border-gray-300 rounded"
+                />
+            </div>
+            {filteredFiles.length > 0 ? (
+                <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+                    <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                        <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                            <tr>
+                                <th scope="col" className="px-6 py-3">
+                                    Title
+                                </th>
+                                <th scope="col" className="px-6 py-3">
+                                    Posted by
+                                </th>
+                                <th scope="col" className="px-6 py-3">
+                                    Created
+                                </th>
+                                <th scope="col" className="px-6 py-3">
+                                    Action
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {paginatedFiles.map(file => (
+                                <tr key={file.id} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                                    <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                        {file.name}
+                                    </th>
+                                    <td className="px-6 py-4">
+                                        {file.uploadedBy}
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        {new Date(file.createdAt).toLocaleString()}
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <Link href={{ pathname: `/filedetails`, query: { id: file.id } }}>
+                                            <span className="rounded-md bg-blue-500 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-600">
+                                                View
+                                            </span>
+                                        </Link>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                    <div className="flex justify-between items-center mt-4 p-4 bg-gray-50">
+                        <button
+                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                            disabled={currentPage === 1}
+                            className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
+                        >
+                            Previous
+                        </button>
+                        <span>
+                            Page {currentPage} of {totalPages}
+                        </span>
+                        <button
+                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                            disabled={currentPage === totalPages}
+                            className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
+                        >
+                            Next
+                        </button>
                     </div>
-                    <div className="hidden sm:flex sm:flex-col sm:items-end">
-                      <p className="text-sm leading-6 text-gray-900">Posted by: {file.uploadedBy}</p>
-                      <p className="mt-1 text-xs leading-5 text-gray-500">Created at: {new Date(file.createdAt).toLocaleString()}</p>
-                      <Link href={{ pathname: `/filedetails`, query: {id: file.id}}}>
-                  <span className="rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
-                    View
-                  </span>
-                </Link>
-                    </div>
-                    
-                  </li>
-                ))
-              ) : (
-                <p>No files available.</p>
-              )}
-            </ul>
-          </div>
-        </>
-      );
+                </div>
+            ) : (
+                <p className="text-gray-500">No files available.</p>
+            )}
+        </div>
+    );
 }
