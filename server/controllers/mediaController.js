@@ -3,9 +3,10 @@ const multer = require('multer');
 const jwt = require('jsonwebtoken');
 const path = require('path');
 const fs = require('fs');
-const { PutObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
+const { PutObjectCommand, DeleteObjectCommand, GetObjectCommand } = require('@aws-sdk/client-s3');
 const Media = require('../models/mediaModel');
 const { S3Client } = require('@aws-sdk/client-s3');
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 
 
 const storage = multer.diskStorage({
@@ -113,6 +114,7 @@ exports.getAllMedia = async (req, res) => {
 exports.getMediaById = async (req, res) => {
     const id = parseInt(req.params.id, 10);
     const userId = 1;
+    let url = null;
 
     if (isNaN(id)) {
         return res.status(400).json({ error: 'Invalid ID' });
@@ -123,7 +125,25 @@ exports.getMediaById = async (req, res) => {
         if (!media) {
             return res.status(404).json({ error: 'Media not found' });
         }
-        res.json(media);
+
+        const fileLocation = media.filePath
+        
+        try{
+            const command = new GetObjectCommand({
+                Bucket: process.env.S3_BUCKET_NAME,
+                Key: fileLocation,
+              });
+            
+              // await the signed URL and return it
+            url = await getSignedUrl(s3Client, command, 3600 );
+              console.log("URL: ", url)
+        } catch (err) {
+            console.error("S3 Get file error: ", err);
+        }
+
+        
+
+        res.json({media, url});
     } catch (err) {
         res.status(500).json({ error: 'Internal Server Error' });
     }
