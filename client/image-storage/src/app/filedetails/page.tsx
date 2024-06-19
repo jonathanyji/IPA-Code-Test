@@ -66,7 +66,7 @@ export default function FileDetailsPage() {
         >
           Delete File
         </button>
-        <Link href={{ pathname: `/editfile`, query: { id: fileDetails.id } }}>
+        <Link href={{ pathname: '/editfile', query: { id: id } }}>
           <span className="inline-block px-4 py-2 bg-blue-500 text-white font-semibold rounded-md shadow-md hover:bg-blue-600 focus:outline-none">
             Edit
           </span>

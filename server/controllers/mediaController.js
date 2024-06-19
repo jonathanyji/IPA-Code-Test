@@ -157,42 +157,37 @@ exports.getMediaById = async (req, res) => {
 exports.updateMedia = [
     body('name').isString().isLength({ min: 1 }).trim().escape(),
     body('description').isString().isLength({ min: 1 }).trim().escape(),
-
+  
     async (req, res) => {
 
-        try {
-            const user = await User.findUserByEmail(req.body.email);
-
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                return res.status(400).json({ errors: errors.array() });
-            }
-
-            const media = {
-                name: req.body.name,
-                description: req.body.description
-            };
-
-            try {
-                const existingMedia = await Media.findById(id, user.id);
-                if (!existingMedia) {
-                    return res.status(404).json({ error: 'Media not found' });
-                }
-
-                await Media.update(id, media);
-                res.json({ id, ...media });
-            } catch (err) {
-                res.status(500).json({ error: 'Database error' });
-            }
-
-        } catch (err) {
-            res.status(500).json({ error: 'Internal Server Error' });
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+  
+      try {
+        const mediaId = req.params.id;
+        const media = {
+          name: req.body.name,
+          description: req.body.description
+        };
+  
+        const existingMedia = await Media.findById(mediaId);
+        if (!existingMedia) {
+          return res.status(404).json({ error: 'Media not found' });
         }
-
-
+  
+        await Media.update(mediaId, media);
+        res.json({ id: mediaId, ...media });
+  
+      } catch (err) {
+        console.error('Internal Server Error:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+      }
     }
-];
+  ];
 
+  
 exports.deleteMedia = async (req, res) => {
     const id = parseInt(req.params.id, 10);
     console.log("DELETE api called")

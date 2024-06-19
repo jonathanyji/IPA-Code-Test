@@ -21,10 +21,11 @@ class Media {
 
     static async update(id, media) {
         await db.execute(
-            'UPDATE Media SET Name = ?, Description = ?, WHERE ID = ?',
+            'UPDATE Media SET Name = ?, Description = ? WHERE ID = ?',
             [media.name, media.description, id]
         );
-    }
+      }
+    
 
     static async delete(id) {
         await db.execute('DELETE FROM Media WHERE ID = ?', [id]);
